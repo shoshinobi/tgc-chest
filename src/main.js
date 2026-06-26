@@ -75,6 +75,7 @@ const roomEnvTexture = pmremGenerator.fromScene(roomEnv).texture;
 roomEnv.dispose();
 
 scene.environment = roomEnvTexture;
+scene.environmentIntensity = 0.8;
 
 // ── Pedestal ──────────────────────────────────────────────────────────────────
 
@@ -348,6 +349,11 @@ fovSlider.addEventListener('input', () => {
   camera.fov = Number(fovSlider.value);
   camera.updateProjectionMatrix();
   fovValue.textContent = `${fovSlider.value}°`;
+});
+
+document.getElementById('env-intensity').addEventListener('input', (e) => {
+  scene.environmentIntensity = Number(e.target.value) / 100;
+  document.getElementById('env-intensity-val').textContent = scene.environmentIntensity.toFixed(2);
 });
 
 document.getElementById('bloom-strength').addEventListener('input', (e) => {
