@@ -187,7 +187,25 @@ composer.addPass(new OutputPass());
 
 // ── Textures ──────────────────────────────────────────────────────────────────
 
-const texLoader = new THREE.TextureLoader();
+// ── Loading manager ───────────────────────────────────────────────────────────
+
+const loaderEl  = document.getElementById('loader');
+const loaderBar = document.getElementById('loader-bar');
+
+const loadingManager = new THREE.LoadingManager();
+
+loadingManager.onProgress = (_url, loaded, total) => {
+  loaderBar.style.width = `${(loaded / total) * 100}%`;
+};
+
+loadingManager.onLoad = () => {
+  loaderBar.style.width = '100%';
+  loaderEl.addEventListener('transitionend', () => loaderEl.remove(), { once: true });
+  // Small delay so the bar visibly hits 100% before fading
+  setTimeout(() => loaderEl.classList.add('done'), 120);
+};
+
+const texLoader = new THREE.TextureLoader(loadingManager);
 
 // Shared baked AO — used by all three material sets.
 const aoTex = texLoader.load('/gltf/tex/chest_ambient_occlusion.png');
@@ -229,7 +247,7 @@ let currentMaterial = null;
 let mixer = null;
 let gltfClips = [];
 
-const gltfLoader = new GLTFLoader();
+const gltfLoader = new GLTFLoader(loadingManager);
 
 gltfLoader.load('/gltf/ChestBlender.gltf', (gltf) => {
   const model = gltf.scene;
