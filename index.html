@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TGC Chest Viewer</title>
+  </head>
+  <body>
+    <div id="app"></div>
+
+    <!-- Settings panel — top left -->
+    <div class="settings-panel">
+      <button class="settings-toggle" id="settings-toggle" data-open="false">
+        Settings <span class="toggle-chevron">›</span>
+      </button>
+      <div class="settings-body" id="settings-body">
+        <div class="settings-row">
+          <span class="settings-label">FOV</span>
+          <input type="range" id="fov-slider" min="20" max="90" value="78" step="1" />
+          <span class="settings-value" id="fov-value">78°</span>
+        </div>
+        <div class="settings-row">
+          <span class="settings-label">Bloom</span>
+          <input type="range" id="bloom-strength" min="0" max="100" value="10" step="1" />
+          <span class="settings-value" id="bloom-strength-val">0.10</span>
+        </div>
+        <div class="settings-row">
+          <span class="settings-label">Bloom Blur</span>
+          <input type="range" id="bloom-blur" min="0" max="100" value="84" step="1" />
+          <span class="settings-value" id="bloom-blur-val">0.84</span>
+        </div>
+        <div class="settings-row">
+          <span class="settings-label">Auto Orbit</span>
+          <button class="toggle-btn" id="auto-orbit-btn" data-active="false">Off</button>
+        </div>
+        <div class="settings-row">
+          <button class="action-btn" id="recenter-btn">Re-center</button>
+        </div>
+        <div class="settings-row">
+          <button class="action-btn" id="reset-hdr-btn">Reset HDR</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- HDR upload — top right -->
+    <button class="hdr-btn" id="hdr-btn">Upload HDR</button>
+    <input type="file" id="hdr-input" accept=".hdr,.exr" hidden />
+
+    <!-- Bottom UI overlay -->
+    <div class="ui-overlay">
+      <!-- Animation controls -->
+      <div class="btn-group anim-group">
+        <button class="anim-btn" id="btn-open">Open</button>
+        <button class="anim-btn" id="btn-close">Close</button>
+      </div>
+      <!-- Material switcher -->
+      <div class="btn-group mat-group">
+        <button class="mat-btn active" data-set="leatherBronze">Leather Bronze</button>
+        <button class="mat-btn" data-set="porcelanWood">Porcelan Wood</button>
+        <button class="mat-btn" data-set="woodSteel">Wood Steel</button>
+      </div>
+    </div>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
