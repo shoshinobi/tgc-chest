@@ -189,6 +189,10 @@ composer.addPass(new OutputPass());
 
 const texLoader = new THREE.TextureLoader();
 
+// Shared baked AO — used by all three material sets.
+const aoTex = texLoader.load('/gltf/tex/chest_ambient_occlusion.png');
+aoTex.flipY = false;
+
 function loadSet(albedoUrl, normalUrl, mixUrl) {
   const albedo = texLoader.load(albedoUrl);
   albedo.colorSpace = THREE.SRGBColorSpace;
@@ -285,7 +289,7 @@ function applyTextureSet(setName) {
     normalMap: set.normal,
     roughnessMap: set.mix,   // green channel
     metalnessMap: set.mix,   // blue channel
-    aoMap: set.mix,          // red channel
+    aoMap: aoTex,            // dedicated baked AO
     aoMapIntensity: 1.0,
     side: THREE.DoubleSide,
   });
