@@ -5,7 +5,7 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { RGBELoader } from 'three/addons/loaders/RGBELoader.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
-import { SSRPass } from 'three/addons/postprocessing/SSRPass.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
@@ -81,13 +81,25 @@ scene.environment = roomEnvTexture;
 const PEDESTAL_HEIGHT = 0.1;
 
 const pedestalGeo = new THREE.CylinderGeometry(1.08, 1.08, PEDESTAL_HEIGHT, 64);
+
+const cubeRT = new THREE.WebGLCubeRenderTarget(128, {
+  generateMipmaps: true,
+  minFilter: THREE.LinearMipmapLinearFilter,
+});
+const cubeCamera = new THREE.CubeCamera(0.05, 10, cubeRT);
+cubeCamera.position.y = PEDESTAL_HEIGHT;
+scene.add(cubeCamera);
+
 const pedestalMat = new THREE.MeshPhysicalMaterial({
   color: 0x0d_0d_10,
   roughness: 0.72,
   metalness: 0.0,
   clearcoat: 0.85,
   clearcoatRoughness: 0.44,
+  envMap: cubeRT.texture,
+  envMapIntensity: 0.65,
 });
+
 const pedestal = new THREE.Mesh(pedestalGeo, pedestalMat);
 pedestal.position.y = PEDESTAL_HEIGHT / 2;
 scene.add(pedestal);
@@ -156,19 +168,7 @@ scene.add(new THREE.Points(particleGeo, particleMat));
 // ── Post-processing ───────────────────────────────────────────────────────────
 
 const composer = new EffectComposer(renderer);
-
-const ssrPass = new SSRPass({
-  renderer,
-  scene,
-  camera,
-  width: window.innerWidth,
-  height: window.innerHeight,
-  selects: [pedestal],  // only the pedestal surface receives reflections
-});
-ssrPass.thickness   = 0.018;
-ssrPass.maxDistance = 0.5;
-ssrPass.opacity     = 0.12;
-composer.addPass(ssrPass);
+composer.addPass(new RenderPass(scene, camera));
 
 const bloomPass = new UnrealBloomPass(
   new THREE.Vector2(window.innerWidth, window.innerHeight),
@@ -233,6 +233,9 @@ gltfLoader.load('/gltf/ChestBlender.gltf', (gltf) => {
     if (!node.isMesh) return;
     chestMeshes.push(node);
     const geo = node.geometry;
+    if (geo.attributes.uv && !geo.attributes.uv1) {
+      geo.setAttribute('uv1', geo.attributes.uv);
+    }
     if (geo.attributes.uv && !geo.attributes.uv2) {
       geo.setAttribute('uv2', geo.attributes.uv);
     }
@@ -391,29 +394,35 @@ renderer.domElement.addEventListener('touchstart',  onUserInteraction, { passive
 // Kick off the initial countdown on page load
 onUserInteraction();
 
-// ── HDR upload ────────────────────────────────────────────────────────────────
+// ── HDR preset dropdown ───────────────────────────────────────────────────────
 
-document.getElementById('hdr-btn').addEventListener('click', () => {
-  document.getElementById('hdr-input').click();
-});
+const HDR_PRESETS = {
+  'indoor-studio': '/gltf/tex/Indoor_Studio_2.hdr',
+  'neutral':       '/gltf/tex/Neutral_512.hdr',
+  'photobox':      '/gltf/tex/Photobox_512.hdr',
+  'studio':        '/gltf/tex/Studio.hdr',
+};
 
-document.getElementById('hdr-input').addEventListener('change', (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
-  const url = URL.createObjectURL(file);
+document.getElementById('hdr-select').addEventListener('change', (e) => {
+  const val = e.target.value;
+  if (!val) {
+    scene.environment = roomEnvTexture;
+    if (scene.background instanceof THREE.Texture) scene.background = null;
+    return;
+  }
+  const url = HDR_PRESETS[val];
+  if (!url) return;
   new RGBELoader().load(url, (hdrTex) => {
     const envMap = pmremGenerator.fromEquirectangular(hdrTex).texture;
     scene.environment = envMap;
-    if (scene.background instanceof THREE.Texture) scene.background = envMap;
     hdrTex.dispose();
-    URL.revokeObjectURL(url);
-    e.target.value = '';
   });
 });
 
 document.getElementById('reset-hdr-btn').addEventListener('click', () => {
   scene.environment = roomEnvTexture;
   if (scene.background instanceof THREE.Texture) scene.background = null;
+  document.getElementById('hdr-select').value = '';
 });
 
 
@@ -424,19 +433,30 @@ window.addEventListener('resize', () => {
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
   composer.setSize(window.innerWidth, window.innerHeight);
-  ssrPass.setSize(window.innerWidth, window.innerHeight);
   bloomPass.setSize(window.innerWidth, window.innerHeight);
 });
 
 // ── Render loop ───────────────────────────────────────────────────────────────
 
-const clock = new THREE.Clock();
-const posAttr = particleGeo.attributes.position;
+const clock    = new THREE.Clock();
+const posAttr  = particleGeo.attributes.position;
+const fpsEl    = document.getElementById('fps-counter');
+let fpsFrames  = 0;
+let fpsAccum   = 0;
 
 function animate() {
   requestAnimationFrame(animate);
-  const delta = clock.getDelta();
+  const delta   = clock.getDelta();
   const elapsed = clock.elapsedTime;
+
+  // FPS counter — update every 500 ms
+  fpsFrames++;
+  fpsAccum += delta;
+  if (fpsAccum >= 0.5) {
+    fpsEl.textContent = `${Math.round(fpsFrames / fpsAccum)} fps`;
+    fpsFrames = 0;
+    fpsAccum  = 0;
+  }
 
   // Animate particles
   for (let i = 0; i < PARTICLE_COUNT; i++) {
@@ -448,6 +468,11 @@ function animate() {
     }
   }
   posAttr.needsUpdate = true;
+
+  // Update pedestal cube-map reflection
+  pedestal.visible = false;
+  cubeCamera.update(renderer, scene);
+  pedestal.visible = true;
 
   // Smooth re-center
   if (reCenterActive) {
@@ -461,7 +486,6 @@ function animate() {
 
   if (mixer) {
     mixer.update(delta);
-    // Pause at the open-state midpoint when triggered by playOpen()
     if (activeAction && pauseAtTime !== null && activeAction.time >= pauseAtTime) {
       activeAction.paused = true;
       pauseAtTime = null;

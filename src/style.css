@@ -181,31 +181,43 @@ input[type="range"]::-webkit-slider-thumb:hover {
   background: rgba(255, 255, 255, 0.14);
 }
 
-/* ── HDR upload — top right ────────────────────────── */
+/* ── HDR preset dropdown — top right ───────────────── */
 
-.hdr-btn {
+.hdr-select {
   position: fixed;
   top: 20px;
   right: 20px;
   font-size: 11px;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.38);
-  background: rgba(8, 8, 10, 0.55);
+  font-family: system-ui, -apple-system, sans-serif;
+  letter-spacing: 0.06em;
+  color: rgba(255, 255, 255, 0.45);
+  background: rgba(8, 8, 10, 0.65);
   border: 1px solid rgba(255, 255, 255, 0.07);
   border-radius: 4px;
-  padding: 9px 15px;
+  padding: 8px 28px 8px 12px;
   cursor: pointer;
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
-  transition: background 0.15s, color 0.15s, border-color 0.15s;
   z-index: 10;
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0l4 5 4-5z' fill='rgba(255,255,255,0.28)'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  transition: background-color 0.15s, border-color 0.15s, color 0.15s;
 }
 
-.hdr-btn:hover {
-  background: rgba(255, 255, 255, 0.07);
-  color: rgba(255, 255, 255, 0.7);
-  border-color: rgba(255, 255, 255, 0.18);
+.hdr-select:hover {
+  background-color: rgba(255, 255, 255, 0.07);
+  border-color: rgba(255, 255, 255, 0.16);
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.hdr-select option {
+  background: #111113;
+  color: rgba(255, 255, 255, 0.8);
+  letter-spacing: 0;
 }
 
 /* ── Bottom UI overlay ─────────────────────────────── */
@@ -282,3 +294,50 @@ input[type="range"]::-webkit-slider-thumb:hover {
 .anim-btn:active {
   background: rgba(255, 255, 255, 0.13);
 }
+
+/* ── FPS counter — bottom right ────────────────────────── */
+
+#fps-counter {
+  position: fixed;
+  bottom: 14px;
+  right: 18px;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: rgba(255, 255, 255, 0.28);
+  font-family: ui-monospace, 'SF Mono', Consolas, monospace;
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* ── Settings divider ───────────────────────────────────── */
+
+.settings-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.07);
+  margin: 2px 0;
+}
+
+/* ── Color picker ───────────────────────────────────────── */
+
+input[type="color"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 32px;
+  height: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 3px;
+  background: none;
+  cursor: pointer;
+  padding: 1px;
+  flex-shrink: 0;
+}
+
+input[type="color"]::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+
+input[type="color"]::-webkit-color-swatch {
+  border: none;
+  border-radius: 2px;
+}
+

@@ -34,6 +34,7 @@
           <span class="settings-label">Auto Orbit</span>
           <button class="toggle-btn" id="auto-orbit-btn" data-active="false">Off</button>
         </div>
+        <div class="settings-divider"></div>
         <div class="settings-row">
           <button class="action-btn" id="recenter-btn">Re-center</button>
         </div>
@@ -43,9 +44,14 @@
       </div>
     </div>
 
-    <!-- HDR upload — top right -->
-    <button class="hdr-btn" id="hdr-btn">Upload HDR</button>
-    <input type="file" id="hdr-input" accept=".hdr,.exr" hidden />
+    <!-- HDR preset select — top right -->
+    <select class="hdr-select" id="hdr-select">
+      <option value="">Room (Default)</option>
+      <option value="indoor-studio">Indoor Studio</option>
+      <option value="neutral">Neutral</option>
+      <option value="photobox">Photo Box</option>
+      <option value="studio">Studio</option>
+    </select>
 
     <!-- Bottom UI overlay -->
     <div class="ui-overlay">
@@ -57,10 +63,13 @@
       <!-- Material switcher -->
       <div class="btn-group mat-group">
         <button class="mat-btn active" data-set="leatherBronze">Leather Bronze</button>
-        <button class="mat-btn" data-set="porcelanWood">Porcelan Wood</button>
         <button class="mat-btn" data-set="woodSteel">Wood Steel</button>
+        <button class="mat-btn" data-set="porcelanWood">Porcelan Wood</button>
       </div>
     </div>
+
+    <!-- FPS counter — bottom right -->
+    <div id="fps-counter">— fps</div>
 
     <script type="module" src="/src/main.js"></script>
   </body>
